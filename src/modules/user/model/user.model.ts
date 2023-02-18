@@ -14,7 +14,7 @@ import { ROLES } from "./../../../common/enum";
 @Scopes({
   basic: {
     attributes: {
-      exclude: ["deletedAt,password"],
+      exclude: ["deletedAt, password"],
     },
   },
 })
@@ -55,4 +55,13 @@ export class User extends Model {
 
   @Column(DataType.DATE)
   deletedAt: Date;
+
+  @Column(DataType.STRING)
+  createdBy: string;
+
+  @Column(DataType.STRING)
+  updatedBy: string;
+
+  @Column(DataType.STRING)
+  deletedBy: string;
 }

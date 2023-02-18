@@ -8,10 +8,15 @@ import {
   DataType,
   Unique,
   Table,
+  DefaultScope,
 } from "sequelize-typescript";
 
 import { User } from "./../../user/model/user.model";
-
+@DefaultScope({
+  attributes: {
+    exclude: ["deletedAt", "deletedBy"],
+  },
+})
 @Table({
   tableName: "post",
   timestamps: true,
@@ -45,4 +50,13 @@ export class Post extends Model {
 
   @Column(DataType.DATE)
   deletedAt: Date;
+
+  @Column(DataType.STRING)
+  createdBy: string;
+
+  @Column(DataType.STRING)
+  updatedBy: string;
+
+  @Column(DataType.STRING)
+  deletedBy: string;
 }

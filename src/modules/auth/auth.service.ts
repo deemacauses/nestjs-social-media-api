@@ -1,14 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   HttpException,
   HttpStatus,
   InternalServerErrorException,
+  BadRequestException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 
+import { AuthDTO } from "./dto/auth.dto";
 import { UserDTO } from "./../user/dto/user.dto";
 import { UserService } from "./../user/user.service";
+import { User } from "./../../common/types";
 
 @Injectable()
 export class AuthService {
@@ -18,8 +22,8 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string) {
-    // Find if user exist with this email
-    const user = await this.userService.findOneByEmail(username);
+    // Find if user exist with this username
+    const user = await this.userService.findOneByUsername(username);
     if (!user) {
       return null;
     }
@@ -32,16 +36,28 @@ export class AuthService {
     return result;
   }
 
-  public async login(user) {
+  public async login(authDto: AuthDTO): Promise<User> {
     try {
-      const token = await this.generateToken(user);
-      return { user, token };
+      const username = authDto.username;
+      const user = await this.userService.findOneByUsername(username);
+      const { password, ...result } = user["dataValues"];
+      const token = await this.generateToken(result);
+      return {
+        user: {
+          id: user.id,
+          role: user.role,
+          name: user.name,
+          email: user.email,
+          username: user.username,
+        },
+        token,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-  public async signup(user: UserDTO) {
+  public async signup(user: UserDTO): Promise<User> {
     try {
       // Check if there exist user with the same email
       const email = user.email;
@@ -51,7 +67,7 @@ export class AuthService {
         throw new HttpException(
           {
             statusCode: HttpStatus.CONFLICT,
-            message: "User already exist",
+            message: "User already exists",
           },
           HttpStatus.CONFLICT,
         );
@@ -68,7 +84,16 @@ export class AuthService {
       // Generate token
       const token = await this.generateToken(result);
       // Return the user and the token
-      return { user: result, token };
+      return {
+        user: {
+          id: result.id,
+          role: result.role,
+          name: result.name,
+          email: result.email,
+          username: result.username,
+        },
+        token,
+      };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -84,7 +109,10 @@ export class AuthService {
     return hash;
   }
 
-  private async comparePassword(enteredPassword, databasePassword) {
+  private async comparePassword(
+    enteredPassword: string,
+    databasePassword: string,
+  ) {
     const match = await bcrypt.compare(enteredPassword, databasePassword);
     return match;
   }

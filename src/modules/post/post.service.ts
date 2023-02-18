@@ -20,7 +20,12 @@ export class PostService {
   ) {}
 
   async createPost(post: PostDTO, userId: number): Promise<Post> {
-    return await this.postRepository.create<Post>({ ...post, userId });
+    return await this.postRepository.create<Post>({
+      ...post,
+      userId,
+      createdBy: userId,
+      updatedBy: userId,
+    });
   }
 
   async findAll(): Promise<Post[]> {

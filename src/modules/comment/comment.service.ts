@@ -20,6 +20,8 @@ export class CommentService {
       ...comment,
       postId,
       userId,
+      createdBy: userId,
+      updatedBy: userId,
     });
   }
 
