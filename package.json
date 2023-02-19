@@ -12,8 +12,8 @@
     "start:dev": "NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "db:migrate": "npx sequelize-cli db:migrate",
-    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:migrate": "ts-node node_modules/.bin/sequelize db:migrate",
+    "db:migrate:undo": "ts-node node_modules/.bin/sequelize db:migrate:undo",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -41,7 +41,8 @@
     "rxjs": "7.2.0",
     "sequelize": "6.28.0",
     "sequelize-cli": "5.5.1",
-    "sequelize-typescript": "2.1.5"
+    "sequelize-typescript": "2.1.5",
+    "typescript": "4.5.5"
   },
   "devDependencies": {
     "@nestjs/cli": "9.0.0",
@@ -66,8 +67,7 @@
     "ts-jest": "29.0.3",
     "ts-loader": "9.2.3",
     "ts-node": "10.0.0",
-    "tsconfig-paths": "4.1.1",
-    "typescript": "4.7.4"
+    "tsconfig-paths": "4.1.1"
   },
   "jest": {
     "moduleFileExtensions": [

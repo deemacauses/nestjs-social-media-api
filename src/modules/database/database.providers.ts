@@ -14,6 +14,7 @@ export const databaseProviders = [
         ...configService.get(DATABASE_CONFIG),
       });
       sequelize.addModels([User, Post, Comment]);
+
       return sequelize;
     },
     inject: [ConfigService],

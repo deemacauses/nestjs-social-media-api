@@ -14,7 +14,6 @@ import config from "config";
     DatabaseModule,
     ConfigModule.forRoot({ load: [config], isGlobal: true }),
     UserModule,
-    UserModule,
     AuthModule,
     PostModule,
     CommentModule,

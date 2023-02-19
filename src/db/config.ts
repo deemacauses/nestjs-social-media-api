@@ -1,3 +1,3 @@
-import config from "../config";
+import config from "../../config";
 
 module.exports = config().database;

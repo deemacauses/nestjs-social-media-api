@@ -1,21 +1,21 @@
+import { ROLES } from "./../../common/enum/index";
 import { CommentDTO } from "./../comment/dto/comment.dto";
 import {
   Controller,
   Get,
   Param,
   NotFoundException,
-  UseGuards,
   Post,
   Body,
   Request,
   Patch,
   Delete,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
 
 import { PostService } from "./post.service";
 import { Post as PostModel } from "./model/post.model";
 import { PostDTO } from "./dto/post.dto";
+import { Roles } from "./../../common/decorators";
 
 @Controller("posts")
 export class PostController {
@@ -27,6 +27,7 @@ export class PostController {
     return await this.postService.findAll();
   }
 
+  @Roles("admin")
   @Get(":id")
   async findOne(@Param("id") id: number): Promise<PostModel> {
     // Find the post with this id
@@ -39,7 +40,7 @@ export class PostController {
     return post;
   }
 
-  @UseGuards(AuthGuard("jwt"))
+  @Roles("admin")
   @Post()
   async createPost(
     @Body() post: PostDTO,
@@ -49,7 +50,7 @@ export class PostController {
     return await this.postService.createPost(post, request.user.id);
   }
 
-  @UseGuards(AuthGuard("jwt"))
+  @Roles("user")
   @Post("/:id/comments")
   async createComment(
     @Param("id") id: number,
@@ -59,7 +60,7 @@ export class PostController {
     return await this.postService.createComment(id, request.user.id, comment);
   }
 
-  @UseGuards(AuthGuard("jwt"))
+  @Roles("user")
   @Patch(":id")
   async update(
     @Param("id") id: number,
@@ -80,7 +81,7 @@ export class PostController {
     return updatedPost;
   }
 
-  @UseGuards(AuthGuard("jwt"))
+  @Roles("admin")
   @Delete(":id")
   async remove(@Param("id") id: number, @Request() request) {
     // Delete the post with this id
