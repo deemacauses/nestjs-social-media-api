@@ -1,4 +1,3 @@
-import { ROLES } from "./../../common/enum/index";
 import { CommentDTO } from "./../comment/dto/comment.dto";
 import {
   Controller,

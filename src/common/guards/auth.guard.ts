@@ -20,9 +20,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    console.log(request.headers.authorization);
     const { authorization } = request.headers;
-    console.log(authorization);
 
     if (!authorization) {
       return false;
@@ -34,11 +32,9 @@ export class AuthGuard implements CanActivate {
         decodedToken.username,
       );
       if (!userFromDB) {
-        console.log(userFromDB);
         return false;
       }
       request.user = userFromDB;
-      console.log(request.user);
       return true;
     } catch {
       return false;

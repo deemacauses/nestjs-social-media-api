@@ -4,7 +4,6 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
-  BadRequestException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
@@ -32,6 +31,7 @@ export class AuthService {
     if (!match) {
       return null;
     }
+
     const { password, ...result } = user["dataValues"];
     return result;
   }

@@ -36,17 +36,15 @@ module.exports = {
       },
       deletedAt: {
         type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: new Date(),
       },
       createdBy: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
       updatedBy: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
       deletedBy: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
     });
   },
