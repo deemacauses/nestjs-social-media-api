@@ -2,14 +2,15 @@ import {
   Injectable,
   Inject,
   InternalServerErrorException,
+  NotFoundException,
 } from "@nestjs/common";
 
 import { CommentService } from "../comment/comment.service";
 import { POST_PROVIDER } from "./../../common/constants";
 import { User } from "../user/model/user.model";
 import { Post } from "./model/post.model";
-import { PostDTO } from "./dto/post.dto";
 import { CommentDTO } from "./../comment/dto/comment.dto";
+import { CreatePostDTO, UpdatePostDTO } from "./dto";
 
 @Injectable()
 export class PostService {
@@ -19,7 +20,7 @@ export class PostService {
     private commentService: CommentService,
   ) {}
 
-  async createPost(post: PostDTO, userId: number): Promise<Post> {
+  async createPost(post: CreatePostDTO, userId: number): Promise<Post> {
     return await this.postRepository.create<Post>({
       ...post,
       userId,
@@ -41,13 +42,23 @@ export class PostService {
     });
   }
 
-  async update(id: number, data, userId: number) {
-    const [numberOfAffectedRows, [updatedPost]] =
-      await this.postRepository.update(
-        { ...data },
-        { where: { id, userId }, returning: true },
-      );
-    return { numberOfAffectedRows, updatedPost };
+  async update(
+    id: number,
+    data: UpdatePostDTO,
+    userId: number,
+  ): Promise<UpdatePostDTO> {
+    // Find the post by ID and user ID
+    const post = await this.postRepository.findOne({
+      where: { id, userId },
+    });
+
+    if (!post) throw new NotFoundException("Post not found");
+    // Update the post with the provided data
+    await this.postRepository.update(
+      { ...data },
+      { where: { id, userId }, returning: true },
+    );
+    return data;
   }
 
   // Create comment for a post
@@ -64,7 +75,7 @@ export class PostService {
     }
   }
 
-  async delete(id: number, userId: number) {
+  async delete(id: number, userId: number): Promise<number> {
     return await this.postRepository.destroy({ where: { id, userId } });
   }
 }

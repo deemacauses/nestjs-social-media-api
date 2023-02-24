@@ -12,6 +12,7 @@ import { AuthDTO } from "./dto/auth.dto";
 import { UserDTO } from "./../user/dto/user.dto";
 import { UserService } from "./../user/user.service";
 import { User } from "./../../common/types";
+import { User as UserModel } from "./../user/model/user.model";
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string) {
+  async validateUser(username: string, pass: string): Promise<any | null> {
     // Find if user exist with this username
     const user = await this.userService.findOneByUsername(username);
     if (!user) {
@@ -99,12 +100,12 @@ export class AuthService {
     }
   }
 
-  private async generateToken(user) {
+  private async generateToken(user: UserModel): Promise<string> {
     const token = await this.jwtService.signAsync(user);
     return token;
   }
 
-  private async hashPassword(password: string) {
+  private async hashPassword(password: string): Promise<string> {
     const hash = await bcrypt.hash(password, 10);
     return hash;
   }
@@ -112,7 +113,7 @@ export class AuthService {
   private async comparePassword(
     enteredPassword: string,
     databasePassword: string,
-  ) {
+  ): Promise<boolean> {
     const match = await bcrypt.compare(enteredPassword, databasePassword);
     return match;
   }

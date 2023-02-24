@@ -12,7 +12,7 @@ import {
 
 import { PostService } from "./post.service";
 import { Post as PostModel } from "./model/post.model";
-import { PostDTO } from "./dto/post.dto";
+import { CreatePostDTO, UpdatePostDTO } from "./dto";
 import { GetCurrentUser, Roles } from "./../../common/decorators";
 
 @Controller("posts")
@@ -20,7 +20,7 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
-  async findAll() {
+  async findAll(): Promise<PostModel[]> {
     // Get all posts in the database
     return await this.postService.findAll();
   }
@@ -41,7 +41,7 @@ export class PostController {
   @Roles("admin")
   @Post()
   async createPost(
-    @Body() post: PostDTO,
+    @Body() post: CreatePostDTO,
     @GetCurrentUser() user: { id: number },
   ): Promise<PostModel> {
     // Create a new post and return the newly created post
@@ -62,21 +62,11 @@ export class PostController {
   @Patch(":id")
   async update(
     @Param("id") id: number,
-    @Body() post: PostDTO,
+    @Body() post: UpdatePostDTO,
     @GetCurrentUser() user: { id: number },
-  ): Promise<PostModel> {
-    // Get the number of row affected and the updated post
-    const { numberOfAffectedRows, updatedPost } = await this.postService.update(
-      id,
-      post,
-      user.id,
-    );
-    // If the number of row affected is zero, it means the post doesn't exist in our database
-    if (numberOfAffectedRows === 0) {
-      throw new NotFoundException("This Post doesn't exist");
-    }
+  ): Promise<UpdatePostDTO> {
     // Return the updated post
-    return updatedPost;
+    return await this.postService.update(id, post, user.id);
   }
 
   @Roles("admin")
@@ -84,7 +74,7 @@ export class PostController {
   async remove(
     @Param("id") id: number,
     @GetCurrentUser() user: { id: number },
-  ) {
+  ): Promise<string> {
     // Delete the post with this id
     const deleted = await this.postService.delete(id, user.id);
     // If the number of row affected is zero, then the post doesn't exist in our database

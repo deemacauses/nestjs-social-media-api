@@ -32,7 +32,7 @@ export class CommentService {
     });
   }
 
-  async delete(id: number, userId: number) {
+  async delete(id: number, userId: number): Promise<number> {
     return await this.commentRepository.destroy({
       where: { id, userId },
     });
