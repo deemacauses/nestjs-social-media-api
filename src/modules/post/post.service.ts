@@ -20,6 +20,12 @@ export class PostService {
     private commentService: CommentService,
   ) {}
 
+  async findUserPosts(userId: number): Promise<Post[]> {
+    return this.postRepository.findAll({
+      where: { userId },
+    });
+  }
+
   async createPost(post: CreatePostDTO, userId: number): Promise<Post> {
     return await this.postRepository.create<Post>({
       ...post,

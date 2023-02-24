@@ -19,6 +19,11 @@ import { GetCurrentUser, Roles } from "./../../common/decorators";
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @Get("users/:userId")
+  async findUserPosts(@Param("userId") userId: number): Promise<PostModel[]> {
+    return this.postService.findUserPosts(userId);
+  }
+
   @Get()
   async findAll(): Promise<PostModel[]> {
     // Get all posts in the database
