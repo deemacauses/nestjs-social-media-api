@@ -23,7 +23,7 @@ export class AuthService {
 
   async validateUser(username: string, pass: string): Promise<any | null> {
     // Find if user exist with this username
-    const user = await this.userService.findOneByUsername(username);
+    const user = await this.userService.findUserByUsername(username);
     if (!user) {
       return null;
     }
@@ -40,7 +40,7 @@ export class AuthService {
   public async login(authDto: AuthDTO): Promise<User> {
     try {
       const username = authDto.username;
-      const user = await this.userService.findOneByUsername(username);
+      const user = await this.userService.findUserByUsername(username);
       const { password, ...result } = user["dataValues"];
       const token = await this.generateToken(result);
       return {
@@ -60,9 +60,12 @@ export class AuthService {
 
   public async signup(user: UserDTO): Promise<User> {
     try {
-      // Check if there exist user with the same email
+      // Check if there exist user with the same email or username
       const email = user.email;
-      const userExists = await this.userService.findOneByEmail(email);
+      const username = user.username;
+      const userExists =
+        (await this.userService.findUserByEmail(email)) ||
+        this.userService.findUserByUsername(username);
 
       if (userExists) {
         throw new HttpException(
@@ -77,7 +80,7 @@ export class AuthService {
       // Hash the password
       const pass = await this.hashPassword(user.password);
       // Create the user
-      const newUser = await this.userService.create({
+      const newUser = await this.userService.createUser({
         ...user,
         password: pass,
       });

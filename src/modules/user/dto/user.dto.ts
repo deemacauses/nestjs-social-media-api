@@ -24,7 +24,7 @@ export class UserDTO {
 
   @IsNotEmpty()
   @IsEnum(ROLES, {
-    message: "Type is not valid",
+    message: "Role Error: Type is not valid",
   })
   role: ROLES;
 

@@ -11,19 +11,19 @@ export class UserService {
     private readonly userRepository: typeof User,
   ) {}
 
-  async create(user: UserDTO): Promise<User> {
+  async createUser(user: UserDTO): Promise<User> {
     return await this.userRepository.create<User>({ ...user });
   }
 
-  async findOneByEmail(email: string): Promise<User> {
+  async findUserByEmail(email: string): Promise<User> {
     return await this.userRepository.findOne<User>({ where: { email } });
   }
 
-  async findOneByUsername(username: string): Promise<User> {
+  async findUserByUsername(username: string): Promise<User> {
     return await this.userRepository.findOne<User>({ where: { username } });
   }
 
-  async findOneById(id: number): Promise<User> {
+  async findUserById(id: number): Promise<User> {
     return await this.userRepository.findOne<User>({ where: { id } });
   }
 }

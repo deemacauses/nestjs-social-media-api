@@ -35,20 +35,20 @@ export class PostService {
     });
   }
 
-  async findAll(): Promise<Post[]> {
+  async findAllPosts(): Promise<Post[]> {
     return await this.postRepository.findAll<Post>({
       include: [{ model: User, attributes: { exclude: ["password"] } }],
     });
   }
 
-  async findOne(id: number): Promise<Post> {
+  async findPost(id: number): Promise<Post> {
     return await this.postRepository.findOne({
       where: { id },
       include: [{ model: User, attributes: { exclude: ["password"] } }],
     });
   }
 
-  async update(
+  async updatePost(
     id: number,
     data: UpdatePostDTO,
     userId: number,
@@ -74,14 +74,14 @@ export class PostService {
     comment: CommentDTO,
   ): Promise<CommentDTO> {
     try {
-      await this.commentService.create(postId, userId, comment);
+      await this.commentService.createComment(postId, userId, comment);
       return comment;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-  async delete(id: number, userId: number): Promise<number> {
-    return await this.postRepository.destroy({ where: { id, userId } });
+  async deletePost(postId: number, userId: number): Promise<number> {
+    return await this.postRepository.destroy({ where: { postId, userId } });
   }
 }

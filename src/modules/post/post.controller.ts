@@ -1,4 +1,3 @@
-import { CommentDTO } from "./../comment/dto/comment.dto";
 import {
   Controller,
   Get,
@@ -10,10 +9,12 @@ import {
   Delete,
 } from "@nestjs/common";
 
+import { CommentDTO } from "./../comment/dto/comment.dto";
 import { PostService } from "./post.service";
 import { Post as PostModel } from "./model/post.model";
 import { CreatePostDTO, UpdatePostDTO } from "./dto";
 import { GetCurrentUser, Roles } from "./../../common/decorators";
+import { ROLES } from "src/common/enum";
 
 @Controller("posts")
 export class PostController {
@@ -25,16 +26,15 @@ export class PostController {
   }
 
   @Get()
-  async findAll(): Promise<PostModel[]> {
+  async findAllPosts(): Promise<PostModel[]> {
     // Get all posts in the database
-    return await this.postService.findAll();
+    return await this.postService.findAllPosts();
   }
 
-  @Roles("admin")
   @Get(":id")
-  async findOne(@Param("id") id: number): Promise<PostModel> {
+  async findPost(@Param("id") id: number): Promise<PostModel> {
     // Find the post with this id
-    const post = await this.postService.findOne(id);
+    const post = await this.postService.findPost(id);
     // If the post doesn't exit in the database, throw a 404 error
     if (!post) {
       throw new NotFoundException("This Post doesn't exist");
@@ -43,7 +43,6 @@ export class PostController {
     return post;
   }
 
-  @Roles("admin")
   @Post()
   async createPost(
     @Body() post: CreatePostDTO,
@@ -53,7 +52,6 @@ export class PostController {
     return await this.postService.createPost(post, user.id);
   }
 
-  @Roles("user")
   @Post("/:id/comments")
   async createComment(
     @Param("id") id: number,
@@ -63,25 +61,25 @@ export class PostController {
     return await this.postService.createComment(id, user.id, comment);
   }
 
-  @Roles("admin")
+  @Roles(ROLES.ADMIN)
   @Patch(":id")
-  async update(
+  async updatePost(
     @Param("id") id: number,
     @Body() post: UpdatePostDTO,
     @GetCurrentUser() user: { id: number },
   ): Promise<UpdatePostDTO> {
     // Return the updated post
-    return await this.postService.update(id, post, user.id);
+    return await this.postService.updatePost(id, post, user.id);
   }
 
-  @Roles("admin")
+  @Roles(ROLES.ADMIN)
   @Delete(":id")
-  async remove(
+  async deletePost(
     @Param("id") id: number,
     @GetCurrentUser() user: { id: number },
   ): Promise<string> {
     // Delete the post with this id
-    const deleted = await this.postService.delete(id, user.id);
+    const deleted = await this.postService.deletePost(id, user.id);
     // If the number of row affected is zero, then the post doesn't exist in our database
     if (deleted === 0) {
       throw new NotFoundException("This Post doesn't exist");

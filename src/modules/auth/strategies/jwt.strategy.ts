@@ -25,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     // Check if user in the token actually exist
-    const user = await this.userService.findOneById(payload.id);
+    const user = await this.userService.findUserById(payload.id);
     if (!user) {
       throw new UnauthorizedException(
         "You are not authorized to perform the operation",
