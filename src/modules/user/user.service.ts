@@ -3,6 +3,7 @@ import { Injectable, Inject } from "@nestjs/common";
 import { USER_PROVIDER } from "./../../common/constants";
 import { UserDTO } from "./dto/user.dto";
 import { User } from "./model/user.model";
+import { ROLES } from "./../../common/enum";
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,11 @@ export class UserService {
   ) {}
 
   async createUser(user: UserDTO): Promise<User> {
-    return await this.userRepository.create<User>({ ...user });
+    const role = ROLES.USER;
+    return await this.userRepository.create<User>({
+      ...user,
+      role,
+    });
   }
 
   async findUserByEmail(email: string): Promise<User> {

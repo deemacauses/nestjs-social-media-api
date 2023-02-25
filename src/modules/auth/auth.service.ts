@@ -63,11 +63,12 @@ export class AuthService {
       // Check if there exist user with the same email or username
       const email = user.email;
       const username = user.username;
-      const userExists =
-        (await this.userService.findUserByEmail(email)) ||
-        this.userService.findUserByUsername(username);
+      const emailExists = await this.userService.findUserByEmail(email);
+      const usernameExists = await this.userService.findUserByUsername(
+        username,
+      );
 
-      if (userExists) {
+      if (emailExists || usernameExists) {
         throw new HttpException(
           {
             statusCode: HttpStatus.CONFLICT,

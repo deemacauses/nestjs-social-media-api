@@ -1,13 +1,10 @@
 import {
-  IsEnum,
   Matches,
   IsEmail,
   IsString,
   IsNotEmpty,
   IsAlphanumeric,
 } from "class-validator";
-
-import { ROLES } from "../../../common/enum";
 
 export class UserDTO {
   @IsNotEmpty()
@@ -21,12 +18,6 @@ export class UserDTO {
   @IsNotEmpty()
   @IsString()
   name: string;
-
-  @IsNotEmpty()
-  @IsEnum(ROLES, {
-    message: "Role Error: Type is not valid",
-  })
-  role: ROLES;
 
   @IsNotEmpty()
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/, {
