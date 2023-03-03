@@ -2,6 +2,7 @@ import { JwtService } from "@nestjs/jwt";
 import { RolesGuard } from "./common/guards/roles.guard";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
+import { ConfigService } from "@nestjs/config";
 
 import { AuthGuard } from "./common/guards";
 import { AppModule } from "./app.module";
@@ -15,12 +16,13 @@ async function bootstrap() {
   const jwtService = app.get(JwtService);
   const userService = app.get(UserService);
 
+  const configService = app.get(ConfigService);
   app.useGlobalGuards(
     new AuthGuard(reflector, jwtService, userService),
     new RolesGuard(new Reflector()),
   );
 
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(configService.get("PORT"));
 }
 bootstrap();

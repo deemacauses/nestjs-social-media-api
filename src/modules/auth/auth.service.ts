@@ -11,7 +11,6 @@ import * as bcrypt from "bcrypt";
 import { AuthDTO } from "./dto/auth.dto";
 import { UserDTO } from "./../user/dto/user.dto";
 import { UserService } from "./../user/user.service";
-import { User } from "./../../common/types";
 import { User as UserModel } from "./../user/model/user.model";
 
 @Injectable()
@@ -33,24 +32,18 @@ export class AuthService {
       return null;
     }
 
-    const { password, ...result } = user["dataValues"];
+    const { password, ...result } = user.get({ plain: true });
     return result;
   }
 
-  public async login(authDto: AuthDTO): Promise<User> {
+  public async login(authDto: AuthDTO): Promise<any> {
     try {
       const username = authDto.username;
       const user = await this.userService.findUserByUsername(username);
-      const { password, ...result } = user["dataValues"];
+      const { password, ...result } = user.get({ plain: true });
       const token = await this.generateToken(result);
       return {
-        user: {
-          id: user.id,
-          role: user.role,
-          name: user.name,
-          email: user.email,
-          username: user.username,
-        },
+        result,
         token,
       };
     } catch (error) {
@@ -58,17 +51,27 @@ export class AuthService {
     }
   }
 
-  public async signup(user: UserDTO): Promise<User> {
+  public async signup(user: UserDTO): Promise<any> {
     try {
       // Check if there exist user with the same email or username
       const email = user.email;
       const username = user.username;
-      const emailExists = await this.userService.findUserByEmail(email);
-      const usernameExists = await this.userService.findUserByUsername(
+
+      const userByEmail = await this.userService.findUserByEmail(email);
+      if (userByEmail) {
+        throw new HttpException(
+          {
+            statusCode: HttpStatus.CONFLICT,
+            message: "User already exists",
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
+
+      const userByUsername = await this.userService.findUserByUsername(
         username,
       );
-
-      if (emailExists || usernameExists) {
+      if (userByUsername) {
         throw new HttpException(
           {
             statusCode: HttpStatus.CONFLICT,
@@ -85,18 +88,11 @@ export class AuthService {
         ...user,
         password: pass,
       });
-      const { password, ...result } = newUser["dataValues"];
       // Generate token
-      const token = await this.generateToken(result);
+      const token = await this.generateToken(newUser);
       // Return the user and the token
       return {
-        user: {
-          id: result.id,
-          role: result.role,
-          name: result.name,
-          email: result.email,
-          username: result.username,
-        },
+        newUser,
         token,
       };
     } catch (error) {
@@ -118,6 +114,9 @@ export class AuthService {
     enteredPassword: string,
     databasePassword: string,
   ): Promise<boolean> {
+    if (!enteredPassword || !databasePassword) {
+      return false;
+    }
     const match = await bcrypt.compare(enteredPassword, databasePassword);
     return match;
   }

@@ -10,4 +10,5 @@ export default () => ({
     password: process.env.DATABASE_PASSWORD || "root",
     database: process.env.DATABASE_NAME_DEVELOPMENT || "social-media",
   },
+  PORT: process.env.PORT || 3000,
 });
