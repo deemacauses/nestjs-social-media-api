@@ -11,13 +11,13 @@ import {
 
 import { ROLES } from "./../../../common/enum";
 
-@Scopes({
-  basic: {
+@Scopes(() => ({
+  user: {
     attributes: {
-      exclude: ["deletedAt, password"],
+      exclude: ["deletedAt", "deletedBy", "password"],
     },
   },
-})
+}))
 @Table({
   tableName: "user",
   timestamps: true,
@@ -46,6 +46,15 @@ export class User extends Model {
 
   @Column(DataType.ENUM(ROLES.ADMIN, ROLES.USER))
   role: ROLES;
+
+  // @Column(DataType.JSON)
+  // friends: number[];
+
+  // @Column(DataType.JSON)
+  // sentFriendshipRequests: number[];
+
+  // @Column(DataType.JSON)
+  // receivedFriendshipRequests: number[];
 
   @Column(DataType.DATE)
   createdAt: Date;

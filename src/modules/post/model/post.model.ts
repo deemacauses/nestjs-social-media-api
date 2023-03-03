@@ -8,15 +8,29 @@ import {
   DataType,
   Unique,
   Table,
-  DefaultScope,
+  Scopes,
+  HasMany,
 } from "sequelize-typescript";
 
 import { User } from "./../../user/model/user.model";
-@DefaultScope({
-  attributes: {
-    exclude: ["deletedAt", "deletedBy"],
+import { Comment } from "./../../comment/model/comment.model";
+
+@Scopes(() => ({
+  withComments: {
+    attributes: {
+      exclude: ["deletedAt", "deletedBy"],
+    },
+    where: {
+      deletedBy: null,
+    },
+    include: [
+      {
+        model: Comment,
+        as: "comment",
+      },
+    ],
   },
-})
+}))
 @Table({
   tableName: "post",
   timestamps: true,
@@ -41,6 +55,9 @@ export class Post extends Model {
 
   @Column(DataType.STRING)
   caption: string;
+
+  @HasMany(() => Comment, "postId")
+  comments: Comment[];
 
   @Column(DataType.DATE)
   createdAt: Date;
