@@ -1,3 +1,4 @@
+import { TransactionInterceptor } from "./common/interceptor/transaction.interceptor";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
@@ -22,5 +23,6 @@ import config from "config";
     FriendshipRequestModule,
     FriendModule,
   ],
+  providers: [TransactionInterceptor],
 })
 export class AppModule {}

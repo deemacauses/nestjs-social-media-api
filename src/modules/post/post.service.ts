@@ -11,7 +11,6 @@ import { User } from "../user/model/user.model";
 import { Post } from "./model/post.model";
 import { CommentDTO } from "./../comment/dto/comment.dto";
 import { CreatePostDTO, UpdatePostDTO } from "./dto";
-
 @Injectable()
 export class PostService {
   constructor(
@@ -60,10 +59,7 @@ export class PostService {
 
     if (!post) throw new NotFoundException("Post not found");
     // Update the post with the provided data
-    await this.postRepository.update(
-      { ...data },
-      { where: { id, userId }, returning: true },
-    );
+    await this.postRepository.update({ ...data }, { where: { id, userId } });
     return data;
   }
 

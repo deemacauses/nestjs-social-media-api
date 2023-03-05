@@ -1,7 +1,15 @@
-import { Controller, UseGuards, Body, Post } from "@nestjs/common";
+import {
+  Controller,
+  UseGuards,
+  Body,
+  Post,
+  UseInterceptors,
+} from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
+import { Transaction } from "sequelize";
 
-import { Public } from "./../../common/decorators";
+import { TransactionInterceptor } from "./../../common/interceptor/transaction.interceptor";
+import { Public, TransactionParam } from "./../../common/decorators";
 import { UserDTO } from "./../user/dto/user.dto";
 import { AuthService } from "./auth.service";
 import { AuthDTO } from "./dto/auth.dto";
@@ -12,9 +20,13 @@ export class AuthController {
 
   @Public()
   @UseGuards(AuthGuard("local"))
+  @UseInterceptors(TransactionInterceptor)
   @Post("login")
-  async login(@Body() user: AuthDTO) {
-    return await this.authService.login(user);
+  async login(
+    @Body() user: AuthDTO,
+    @TransactionParam() transaction: Transaction,
+  ) {
+    return await this.authService.login(user, transaction);
   }
 
   @Public()

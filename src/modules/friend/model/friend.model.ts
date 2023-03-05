@@ -3,19 +3,10 @@ import {
   Column,
   DataType,
   Table,
-  Scopes,
   ForeignKey,
 } from "sequelize-typescript";
 
 import { User } from "../../user/model/user.model";
-
-@Scopes(() => ({
-  user: {
-    attributes: {
-      exclude: ["deletedAt", "deletedBy"],
-    },
-  },
-}))
 @Table({
   tableName: "friend",
   timestamps: true,

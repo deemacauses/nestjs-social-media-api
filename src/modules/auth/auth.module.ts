@@ -9,11 +9,13 @@ import { AuthController } from "./auth.controller";
 
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { LocalStrategy } from "./strategies/local.strategy";
+import { DatabaseModule } from "../database/database.module";
 
 dotenv.config();
 
 @Module({
   imports: [
+    DatabaseModule,
     PassportModule,
     UserModule,
     JwtModule.register({
