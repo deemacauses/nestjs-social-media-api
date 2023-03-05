@@ -3,20 +3,12 @@ import {
   Column,
   DataType,
   Table,
-  Scopes,
   ForeignKey,
 } from "sequelize-typescript";
 
 import { STATUS } from "../../../common/enum";
 import { User } from "./../../user/model/user.model";
 
-@Scopes(() => ({
-  user: {
-    attributes: {
-      exclude: ["deletedAt", "deletedBy"],
-    },
-  },
-}))
 @Table({
   tableName: "friendship-request",
   timestamps: true,

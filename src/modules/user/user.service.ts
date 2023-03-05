@@ -33,9 +33,10 @@ export class UserService {
     return user;
   }
 
-  async findUserByUsername(username: string) {
+  async findUserByUsername(username: string, options?: any) {
     const user = (await this.userRepository.findOne({
       where: { username },
+      ...options,
     })) as User;
     return user;
   }

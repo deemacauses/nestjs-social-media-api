@@ -26,14 +26,19 @@ export class FriendService {
         userId,
         friends: [friendId],
       });
-      await user.save();
     } else {
       // If a Friend record already exists, check if the friendId is already in the friends array
       const friendIndex = user.friends.indexOf(friendId);
       if (friendIndex === -1) {
         // If the friendId is not already in the friends array, add it
-        user.friends.push(friendId);
-        await user.save();
+        // user.friends.push(friendId);
+        const data = user.friends;
+        data.push(userId);
+        await this.friendRepository.update(
+          { friends: data },
+          { where: { userId: friendId } },
+        );
+        throw Error("Error");
       }
     }
     let friend = await this.friendRepository.findOne({
@@ -44,14 +49,19 @@ export class FriendService {
         userId: friendId,
         friends: [userId],
       });
-      await friend.save();
     } else {
       const userIndex = friend.friends.indexOf(userId);
       if (userIndex === -1) {
-        friend.friends.push(userId);
-        await friend.save();
+        const data = friend.friends;
+        data.push(userId);
+        await this.friendRepository.update(
+          { friends: data },
+          { where: { userId } },
+        );
       }
     }
+    console.log(user);
+    console.log(friend);
     return [user, friend];
   }
 }

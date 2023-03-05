@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
+import { Transaction } from "sequelize";
 
 import { AuthDTO } from "./dto/auth.dto";
 import { UserDTO } from "./../user/dto/user.dto";
@@ -36,10 +37,12 @@ export class AuthService {
     return result;
   }
 
-  public async login(authDto: AuthDTO): Promise<any> {
+  public async login(authDto: AuthDTO, transaction: Transaction): Promise<any> {
     try {
       const username = authDto.username;
-      const user = await this.userService.findUserByUsername(username);
+      const user = await this.userService.findUserByUsername(username, {
+        transaction,
+      });
       const { password, ...result } = user.get({ plain: true });
       const token = await this.generateToken(result);
       return {
@@ -106,7 +109,7 @@ export class AuthService {
   }
 
   private async hashPassword(password: string): Promise<string> {
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(password, 8);
     return hash;
   }
 
