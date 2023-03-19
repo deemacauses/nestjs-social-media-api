@@ -13,93 +13,82 @@ import { AuthDTO } from "./dto/auth.dto";
 import { UserDTO } from "./../user/dto/user.dto";
 import { UserService } from "./../user/user.service";
 import { User as UserModel } from "./../user/model/user.model";
+import { AWSCognitoService } from "../aws/aws-cognito.service";
+import { AuthLoginUserDTO, AuthRegisterUserDTO } from "./../aws/dto";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly awsCognitoService: AWSCognitoService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any | null> {
-    // Find if user exist with this username
-    const user = await this.userService.findUserByUsername(username);
-    if (!user) {
+  async validateUser(username: string, password: string): Promise<any | null> {
+    // Use AwsCognitoService to validate the user
+    const authLoginUserDto: AuthLoginUserDTO = { username, password };
+    try {
+      const result = await this.awsCognitoService.authenticateUser(
+        authLoginUserDto,
+      );
+      const user = await this.userService.findUserByUsername(username);
+      const { password, ...userData } = user.get({ plain: true });
+      return userData;
+    } catch (error) {
       return null;
     }
-    // Find if user password match
-    const match = await this.comparePassword(pass, user.password);
-    if (!match) {
-      return null;
-    }
-
-    const { password, ...result } = user.get({ plain: true });
-    return result;
   }
 
   public async login(authDto: AuthDTO, transaction: Transaction): Promise<any> {
+    // Use AwsCognitoService to authenticate the user
+    const authLoginUserDto: AuthLoginUserDTO = {
+      username: authDto.username,
+      password: authDto.password,
+    };
     try {
-      const username = authDto.username;
-      const user = await this.userService.findUserByUsername(username, {
+      const result = await this.awsCognitoService.authenticateUser(
+        authLoginUserDto,
+      );
+      const user = await this.userService.findUserByUsername(authDto.username, {
         transaction,
       });
-      const { password, ...result } = user.get({ plain: true });
-      const token = await this.generateToken(result);
-      return {
-        result,
-        token,
-      };
+      const { password, ...userData } = user.get({ plain: true });
+      return userData;
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
   public async signup(user: UserDTO): Promise<any> {
+    // Use AwsCognitoService to register the user
+    const authRegisterUserDto: AuthRegisterUserDTO = {
+      name: user.name,
+      email: user.email,
+      password: user.password,
+    };
     try {
-      // Check if there exist user with the same email or username
-      const email = user.email;
-      const username = user.username;
-
-      const userByEmail = await this.userService.findUserByEmail(email);
-      if (userByEmail) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.CONFLICT,
-            message: "User already exists",
-          },
-          HttpStatus.CONFLICT,
-        );
-      }
-
-      const userByUsername = await this.userService.findUserByUsername(
-        username,
-      );
-      if (userByUsername) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.CONFLICT,
-            message: "User already exists",
-          },
-          HttpStatus.CONFLICT,
-        );
-      }
-
-      // Hash the password
+      await this.awsCognitoService.registerUser(authRegisterUserDto);
       const pass = await this.hashPassword(user.password);
-      // Create the user
       const newUser = await this.userService.createUser({
         ...user,
         password: pass,
       });
-      // Generate token
+      console.log(newUser);
       const token = await this.generateToken(newUser);
-      // Return the user and the token
-      return {
-        newUser,
-        token,
-      };
+      return { newUser, token };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      console.log(error);
+      if (
+        error.code === "UsernameExistsException" ||
+        error.code === "InvalidParameterException"
+      ) {
+        throw new HttpException(
+          { statusCode: HttpStatus.CONFLICT, message: "User already exists" },
+          HttpStatus.CONFLICT,
+        );
+      } else {
+        throw new InternalServerErrorException(error);
+      }
     }
   }
 

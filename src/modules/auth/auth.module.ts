@@ -7,14 +7,14 @@ import { AuthService } from "./auth.service";
 import { UserModule } from "./../user/user.module";
 import { AuthController } from "./auth.controller";
 
-import { JwtStrategy } from "./strategies/jwt.strategy";
-import { LocalStrategy } from "./strategies/local.strategy";
 import { DatabaseModule } from "../database/database.module";
+import { AWSModule } from "./../aws/aws.module";
 
 dotenv.config();
 
 @Module({
   imports: [
+    AWSModule,
     DatabaseModule,
     PassportModule,
     UserModule,
@@ -23,7 +23,7 @@ dotenv.config();
       signOptions: { expiresIn: process.env.TOKEN_EXPIRATION },
     }),
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService],
   controllers: [AuthController],
 })
 export class AuthModule {}
