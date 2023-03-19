@@ -9,6 +9,7 @@ import { PostModule } from "./modules/post/post.module";
 import { CommentModule } from "./modules/comment/comment.module";
 import { FriendshipRequestModule } from "./modules/friendship-request/friendship-request.module";
 import { FriendModule } from "./modules/friend/friend.module";
+import { AWSModule } from "./modules/aws/aws.module";
 
 import config from "config";
 
@@ -22,6 +23,7 @@ import config from "config";
     CommentModule,
     FriendshipRequestModule,
     FriendModule,
+    AWSModule,
   ],
   providers: [TransactionInterceptor],
 })

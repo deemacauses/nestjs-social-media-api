@@ -1,11 +1,10 @@
 import {
   Controller,
-  UseGuards,
   Body,
   Post,
   UseInterceptors,
+  BadRequestException,
 } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
 import { Transaction } from "sequelize";
 
 import { TransactionInterceptor } from "./../../common/interceptor/transaction.interceptor";
@@ -13,13 +12,16 @@ import { Public, TransactionParam } from "./../../common/decorators";
 import { UserDTO } from "./../user/dto/user.dto";
 import { AuthService } from "./auth.service";
 import { AuthDTO } from "./dto/auth.dto";
+import { AWSCognitoService } from "./../aws/aws-cognito.service";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private awsCognitoService: AWSCognitoService,
+  ) {}
 
   @Public()
-  @UseGuards(AuthGuard("local"))
   @UseInterceptors(TransactionInterceptor)
   @Post("login")
   async login(
@@ -33,5 +35,17 @@ export class AuthController {
   @Post("signup")
   async signUp(@Body() user: UserDTO) {
     return await this.authService.signup(user);
+  }
+
+  @Public()
+  @Post("confirm")
+  async confirm(
+    @Body() confirmUser: { username: string; confirmationCode: string },
+  ) {
+    try {
+      return await this.awsCognitoService.confirmUser(confirmUser);
+    } catch (e) {
+      throw new BadRequestException(e.message);
+    }
   }
 }
